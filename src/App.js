@@ -1,9 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
 import React, { Component } from 'react';
+import * as $ from 'jquery';
 import queryString from 'query-string';
 import silhouette from './Assets/Sillouette - Mid Fi.png';
 import silhouetteHighlighted from './Assets/Silhouette-Highlighted.png';
+import silhouetteBlue from './Assets/Silhouette-Blue.png';
+import silhouetteGreen from './Assets/Silhouette-Green.png';
 import background from './Assets/image_7.png';
 import loginBackground from './Assets/Login_Background.png';
 import albumcovertemp from './Assets/Temp_Album_Cover.jpg';
@@ -22,30 +25,6 @@ import song2 from './Assets/Casting Crowns - Voice of Truth.mp3';
 import song2Cover from './Assets/Casting Crown Album Cover.jpg';
 
 
-const scopes = [
-  'user-read-playback-state',
-//  'user-modify-playback-state',
-  'user-read-currently-playing',
-//  'user-read-playback-position',
-//  'user-read-email',
-//  'user-read-private',
-//  'streaming'
-];
-
-
-
-let fakeServerData = {
-  user: {
-    name: 'Jenny',
-    currentSong: {
-      title: 'What Im Here For',
-      artist: 'Nicholas Wells',
-      albumcover: albumcovertemp,
-      playStatus: 'Paused',
-      playBar: 'Playing bar here'
-    }
-  }
-}
 
 let enterStyle = {
   height: '350px',
@@ -154,7 +133,7 @@ class DetailsBanner extends Component {
   render() {
     return (
       <div style={{display: 'flex', 'justify-content': 'space-between', color: '#781C76', 'background-color': 'rgba(199, 89, 75, 0.3)'}}>
-        <YourPlaying currentSong={this.props.currentSong}/>
+        <YourPlaying currentSong={this.props.currentSong} is_playing={this.props.is_playing}/>
         <YourHeader/>
         <YourLikes/>
         <YourHistory/>
@@ -171,7 +150,7 @@ class YourPlaying extends Component {
       <div style={{width: '45%', display: 'flex', 'justify-content': 'space-between', 'border-style': 'solid', 'border-color': 'rgba(129, 28, 118, 0.5)', 'border-radius': '10px', margin: '10px'}}>
         <AlbumCover currentSong={this.props.currentSong}/>
         <TitleArtist currentSong={this.props.currentSong}/>
-        <PlayBar currentSong={this.props.currentSong}/>
+        <PlayBar is_playing={this.props.is_playing}/>
       </div>
     );
   }
@@ -181,7 +160,7 @@ class AlbumCover extends Component {
   render() {
     return (
       <div style={{width: '30%', height: 'auto'}}>
-        <img src={this.props.currentSong.albumcover} style={{width: '70%', height: 'auto', padding:'5px'}}/>
+        <img src={this.props.currentSong.albumcover} style={{width: '80%', height: 'auto', padding:'10px', margin: '0', top: '50%'}}/>
       </div>
     );
   }
@@ -191,8 +170,8 @@ class TitleArtist extends Component {
   render() {
     return (
       <div style={{width: '30%', margin: 'auto'}}>
-        <p style={{'font-weight': 'bold', 'font-size': '120%'}}>{this.props.currentSong.title}</p>
-        <p>{this.props.currentSong.artist}</p>
+        <p style={{'font-weight': 'bold', 'font-size': '120%', textAlign: 'left', paddingLeft: '5px', marginBottom: '10px'}}>{this.props.currentSong.title}</p>
+        <p style={{textAlign: 'left', paddingLeft: '5px', marginTop: '10px'}}>{this.props.currentSong.artist}</p>
       </div>
     );
   }
@@ -200,9 +179,15 @@ class TitleArtist extends Component {
 
 class PlayBar extends Component {
   render() {
+    let currentStatus = 'Currently Paused';
+    if (true) {
+      currentStatus = 'Currently Playing'
+    }
     return (
-      <div style={{width: '40%', margin: 'auto', border: 'solid', 'border-radius': '5px'}}>
-        <p>{this.props.currentSong.playBar}</p>
+      <div style={{width: '40%', margin: 'auto'}}>
+        <div>
+          <h4 style={{margin: 'auto', paddingBottom: '10px'}}>You are Currently Playing on Spotify</h4>
+        </div>
       </div>
     );
   }
@@ -243,7 +228,6 @@ class YourChats extends Component {
     );
   }
 }
-
 
 class HoverDetail1 extends Component {
   render() {
@@ -313,6 +297,20 @@ class Silhouette3 extends Component {
   }
 }
 
+class Silhouette4 extends Component {
+  render() {
+    return (
+      <img src={silhouetteBlue} style={{width: '120px', height: 'auto', zIndex:'100'}}/>
+    );
+  }
+}
+class Silhouette5 extends Component {
+  render() {
+    return (
+      <img src={silhouetteGreen} style={{width: '120px', height: 'auto', zIndex:'100'}}/>
+    );
+  }
+}
 
 class BackgroundSilhouettes extends Component {
   render() {
@@ -417,17 +415,63 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {serverData: {}, enterTrigger: true};
+    this.state = {
+      accessToken: null,
+      currentSong: {
+        title: 'What I\m Here For',
+        artist: 'Nicholas Wells',
+        albumcover: albumcovertemp
+      },
+      is_playing: false,
+      progressBar: 0,
+    }
+    /*this.state = {serverData: {fakeServerData}, enterTrigger: true};*/
   }
+
 
   componentDidMount() {
     let parsedURI = queryString.parse(window.location.search);
-    let accessToken = parsedURI.access_token;
+    let token = parsedURI.access_token;
     console.log(parsedURI);
+    this.setState({
+      accessToken: token
+    })
+    fetch('https://api.spotify.com/v1/me', {
+      headers: {'Authorization': 'Bearer ' + token}
+    }).then((response) => response.json()).
+    then(data => {
+      console.log(data)
+      this.setState({
+      user: {
+        name: data.display_name
+      }
+    })})
 
-    fetch('https://api.spotify.com/v1/me');
+    fetch('https://api.spotify.com/v1/me/player', {
+      headers: {'Authorization': 'Bearer ' + token}
+    }).then((response) => response.json()).
+    then((data) => {
+      console.log(data)
+      if (!(data.item == null)) {
+        this.setState({
+          currentSong: {
+            title: data.item.name,
+            artist: data.item.artists[0].name,
+            albumcover: data.item.album.images[1].url
+          },
+          is_playing: data.item.is_playing
+        })
+      } else {
+        this.setState({
+          currentSong: {
+            title: 'What I\m Here For',
+            artist: 'Nicholas Wells',
+            albumcover: albumcovertemp
+          }
+        })
+      }
+    })
 
-    this.setState({serverData: fakeServerData});
   }
 
   enterTemp = () => {
@@ -437,7 +481,7 @@ class App extends Component {
   }
 
   render() {
-    if (this.state.enterTrigger){
+    if (this.state.accessToken == null){
       document.body.style.backgroundImage = 'url(' + loginBackground + ')';
       document.body.style.backgroundSize = '200% auto';
       document.body.style.backgroundRepeat = 'repeat';
@@ -451,6 +495,7 @@ class App extends Component {
     }
     else {
       document.body.style.backgroundColor = null;
+      console.log(this.state.currentSong)
       let name = 'Jenny'
       let purple = '#82317D'
       let headerStyle = {color: purple, 'font-size': '50px'}
@@ -463,7 +508,7 @@ class App extends Component {
           <HoverDetail1/>
           <HoverDetail2/>
           <div style={{position: 'fixed', top: '270px', left: '155px', zIndex: '100'}}>
-            <Silhouette2/>
+            <Silhouette3/>
           </div>
           <div style={{position: 'fixed', top: '300px', left: '615px', zIndex: '100'}}>
             <Silhouette2/>
@@ -473,9 +518,11 @@ class App extends Component {
               <Silhouette3/>
             </div>
           </div>
-          <div style={{position: 'fixed', bottom: '0', zIndex: '100'}}>
-            <DetailsBanner user={this.state.serverData.user} currentSong={this.state.serverData.user.currentSong}/>
-          </div>
+          {this.state.currentSong &&
+            <div style={{position: 'fixed', bottom: '0', zIndex: '100'}}>
+              <DetailsBanner currentSong={this.state.currentSong} is_playing={this.state.is_playing}/>
+            </div>
+          }
         </div>
       );
     }
