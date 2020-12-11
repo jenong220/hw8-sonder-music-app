@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import React, { Component } from 'react';
+import queryString from 'query-string';
 import silhouette from './Assets/Sillouette - Mid Fi.png';
 import silhouetteHighlighted from './Assets/Silhouette-Highlighted.png';
 import background from './Assets/image_7.png';
@@ -21,11 +22,6 @@ import song2 from './Assets/Casting Crowns - Voice of Truth.mp3';
 import song2Cover from './Assets/Casting Crown Album Cover.jpg';
 
 
-//Groundwork to link up to Spotify API - Thank You to JoeKarlsson (see write-up)
-export const authEndpt = 'https://accounts.spotify.com/authorize';
-
-const clientID = '00d82b47772345ed98e5c52151fdba75';
-const redirectURI = 'http://localhost:3000';
 const scopes = [
   'user-read-playback-state',
 //  'user-modify-playback-state',
@@ -36,15 +32,6 @@ const scopes = [
 //  'streaming'
 ];
 
-const hash = window.location.hash.substring(1).split("&").reduce(function(initial, item) {
-  if (item) {
-    var parts = item.split('=');
-    initial[parts[0]] = decodeURIComponent(parts[1])
-  }
-  return initial;
-}, {});
-
-window.location.hash=""
 
 
 let fakeServerData = {
@@ -60,7 +47,7 @@ let fakeServerData = {
   }
 }
 
-let logInStyle = {
+let enterStyle = {
   height: '350px',
   width: '400px',
   margin: 'auto',
@@ -73,6 +60,21 @@ let logInStyle = {
   backgroundColor: 'rgba(242, 242, 242, 0.4)',
   color: 'rgba(136, 55, 131, 1.0)'
 
+}
+
+let enterButtonStyle = {
+  height: '30px',
+  width: '100px',
+  margin: 'auto',
+  width: '50%',
+  marginTop: '20px',
+  borderColor: 'rgba(199, 89, 75, 1.0)',
+  borderRadius: '30px',
+  backgroundColor: 'rgba(199, 89, 75, 1.0)',
+  color: 'rgba(255, 255, 255, 1.0)',
+  fontWeight: 'light',
+  fontSize: '20px',
+  boxShadow: '2px 2px 4px #E9B9B3'
 }
 
 let hoverPlayStyleGen = {
@@ -99,7 +101,7 @@ let song2Position = {
   left: '710px',
 }
 
-class LoginHeader extends Component {
+class EnterHeader extends Component {
   render() {
     return (
       <div style={{color: '#781C76'}} className="titleHeader">
@@ -116,13 +118,15 @@ class LoginHeader extends Component {
   }
 }
 
-class LoginBox extends Component {
+class EnterBox extends Component {
   render () {
     return (
-      <div style={logInStyle}>
-        <h1 style={{paddingTop: '35px'}}>Sign into your Music Player</h1>
-        <button onClick={this.props.logInTemp}>
-          Log In Now
+      <div style={enterStyle}>
+        <h1 style={{paddingTop: '35px'}}>Welcome to Sonder</h1>
+        <h2>A music exploration platform</h2>
+        <h3>Click the button below to begin</h3>
+        <button onClick={this.props.enterTemp} style={enterButtonStyle}>
+          Enter Sonder
         </button>
 
       </div>
@@ -413,33 +417,35 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {serverData: fakeServerData, loginTrigger: true};
+    this.state = {serverData: {}, enterTrigger: true};
   }
 
   componentDidMount() {
-    let _token = hash.access_token;
-    console.log(_token);
-    if (_token) {
-      this.setState({token: _token});
-    }
+    let parsedURI = queryString.parse(window.location.search);
+    let accessToken = parsedURI.access_token;
+    console.log(parsedURI);
+
+    fetch('https://api.spotify.com/v1/me');
+
     this.setState({serverData: fakeServerData});
   }
 
-  logInTemp = () => {
-    this.setState({loginTrigger: false});
+  enterTemp = () => {
+    window.location = 'http://localhost:8888/login';
+    this.setState({enterTrigger: false});
+
   }
 
   render() {
-    if (this.state.loginTrigger){
+    if (this.state.enterTrigger){
       document.body.style.backgroundImage = 'url(' + loginBackground + ')';
       document.body.style.backgroundSize = '200% auto';
       document.body.style.backgroundRepeat = 'repeat';
-      console.log(this.state.token);
-      console.log('CAT');
+
       return (
         <div className="App" style={{position: 'center'}}>
-          <LoginHeader/>
-          <LoginBox logInTemp={this.logInTemp}/>
+          <EnterHeader/>
+          <EnterBox enterTemp={this.enterTemp}/>
         </div>
       );
     }
