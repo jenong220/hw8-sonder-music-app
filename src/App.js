@@ -475,8 +475,10 @@ class App extends Component {
   }
 
   enterTemp = () => {
-    window.location = 'http://localhost:8888/login';
-    this.setState({enterTrigger: false});
+    window.location =  window.location.includes('localhost')
+      ? 'http://localhost:8888/login'
+      : 'https://https://hw8-sonder-music-backend.herokuapp.com/login'
+/*    this.setState({enterTrigger: false});*/
 
   }
 
