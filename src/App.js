@@ -477,7 +477,7 @@ class App extends Component {
   enterTemp = () => {
     window.location =  window.location.href.includes('localhost')
       ? 'http://localhost:8888/login'
-      : 'https://https://hw8-sonder-music-backend.herokuapp.com/login'
+      : 'https://hw8-sonder-music-backend.herokuapp.com/login'
 /*    this.setState({enterTrigger: false});*/
 
   }
@@ -510,10 +510,10 @@ class App extends Component {
           <HoverDetail1/>
           <HoverDetail2/>
           <div style={{position: 'fixed', top: '270px', left: '155px', zIndex: '100'}}>
-            <Silhouette3/>
+            <Silhouette4/>
           </div>
           <div style={{position: 'fixed', top: '300px', left: '615px', zIndex: '100'}}>
-            <Silhouette2/>
+            <Silhouette5/>
           </div>
           <div style={{position: 'fixed', bottom: '10px', width: '100%', zIndex: '90'}}>
             <div style={{display: 'block', margin: 'auto'}}>
